@@ -22,24 +22,21 @@ ACoolDrone::ACoolDrone()
 	VisionSphere = CreateDefaultSubobject<USphereComponent>("VisionSphere");
 	VisionSphere->SetupAttachment(Root);
 	VisionSphere->SetSphereRadius(1000.f);
-	VisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ACoolDrone::HandleVisionBeginOverlap);
-	VisionSphere->OnComponentEndOverlap.AddDynamic(this, &ACoolDrone::HandleVisionEndOverlap);
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>("ProjectileSpawnPoint");
 	ProjectileSpawnPoint->SetupAttachment(Root);
 
 	HealthComponent = CreateDefaultSubobject<UCoolHealthComponent>("Health");
 	HealthComponent->OnDeath.AddDynamic(this, &ACoolDrone::HandleDeath);
-
-	StateHandlers.Add(EDroneState::Idle, &ACoolDrone::HandleIdle);
-	StateHandlers.Add(EDroneState::Chase, &ACoolDrone::HandleChase);
-	StateHandlers.Add(EDroneState::Aggressive, &ACoolDrone::HandleAggressive);
 }
 
 // Called when the game starts or when spawned
 void ACoolDrone::BeginPlay()
 {
 	Super::BeginPlay();
+
+	VisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ACoolDrone::HandleVisionBeginOverlap);
+	VisionSphere->OnComponentEndOverlap.AddDynamic(this, &ACoolDrone::HandleVisionEndOverlap);
 
 	SelectRandomControlPoint();
 }
@@ -54,9 +51,12 @@ void ACoolDrone::Tick(float DeltaTime)
 
 void ACoolDrone::HandleIdle(float DeltaTime)
 {
-	FVector ControlPointLocation = CurrentControlPoint->GetActorLocation();
+	if (!CurrentControlPoint) return;
 
-	RotateTowards(ControlPointLocation, DeltaTime, true);
+	FVector ControlPointLocation = CurrentControlPoint->GetActorLocation();
+	FVector IgnoreZPos = FVector(ControlPointLocation.X, ControlPointLocation.Y, GetActorLocation().Z);
+
+	RotateTowards(IgnoreZPos, DeltaTime);
 	MoveTowards(ControlPointLocation, DeltaTime);
 
 	if (FVector::Dist(GetActorLocation(), CurrentControlPoint->GetActorLocation()) < TargetPositionTolerance)
@@ -68,11 +68,7 @@ void ACoolDrone::HandleIdle(float DeltaTime)
 	{
 		if (TargetIsVisible())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Target is visible!"));
 			CurrentState = EDroneState::Aggressive;
-		} else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Target is not visible!"));
 		}
 	}
 }
@@ -118,10 +114,9 @@ void ACoolDrone::HandleAggressive(float DeltaTime)
 	TryFire();
 }
 
-void ACoolDrone::RotateTowards(const FVector& Position, float DeltaTime, bool DisablePitch)
+void ACoolDrone::RotateTowards(const FVector& Position, float DeltaTime)
 {
 	FVector Direction = Position - GetActorLocation();
-	if (DisablePitch) Direction.Z = 0.f;
 	Direction.Normalize();
 	FRotator TargetRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
 	FRotator CurrentRotation = GetActorRotation();
@@ -129,10 +124,9 @@ void ACoolDrone::RotateTowards(const FVector& Position, float DeltaTime, bool Di
 	SetActorRotation(NewRotation);
 }
 
-void ACoolDrone::MoveTowards(const FVector& Position, float DeltaTime, bool DisableY)
+void ACoolDrone::MoveTowards(const FVector& Position, float DeltaTime)
 {
 	FVector Direction = Position - GetActorLocation();
-	if (DisableY) Direction.Z = 0.f;
 	Direction.Normalize();
 
 	FHitResult SweepHit;

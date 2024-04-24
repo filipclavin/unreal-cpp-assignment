@@ -51,6 +51,16 @@ void ACoolDrone::Tick(float DeltaTime)
 
 void ACoolDrone::HandleIdle(float DeltaTime)
 {
+	if (Target)
+	{
+		if (TargetIsVisible())
+		{
+			CurrentState = EDroneState::Aggressive;
+		}
+	}
+
+	if (!CurrentControlPoint) return;
+
 	FVector ControlPointLocation = CurrentControlPoint->GetActorLocation();
 	FVector IgnoreZPos = FVector(ControlPointLocation.X, ControlPointLocation.Y, GetActorLocation().Z);
 
@@ -60,14 +70,6 @@ void ACoolDrone::HandleIdle(float DeltaTime)
 	if (FVector::Dist(GetActorLocation(), CurrentControlPoint->GetActorLocation()) < TargetPositionTolerance)
 	{
 		SelectRandomControlPoint();
-	}
-
-	if (Target)
-	{
-		if (TargetIsVisible())
-		{
-			CurrentState = EDroneState::Aggressive;
-		}
 	}
 }
 
