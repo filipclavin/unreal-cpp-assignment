@@ -95,9 +95,9 @@ private:
 
 	void HandleAggressive(float DeltaTime);
 
-	void RotateTowards(const FVector& Position, float DeltaTime, bool DisablePitch = false);
+	void RotateTowards(const FVector& Position, float DeltaTime);
 
-	void MoveTowards(const FVector& Position, float DeltaTime, bool DisableY = false);
+	void MoveTowards(const FVector& Position, float DeltaTime);
 
 	void SelectRandomControlPoint();
 

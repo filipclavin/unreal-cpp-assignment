@@ -13,8 +13,8 @@ public:
 	void BeginPlay() override;
 	void TakeDamage(float Damage)
 	{
-		CurrentHealth -= Damage;
 		UE_LOG(LogTemp, Log, TEXT("Ouchie! I have %f / %f health"), CurrentHealth, MaximumHealth);
+		CurrentHealth -= Damage;
 
 		if (CurrentHealth <= 0.f)
 		{

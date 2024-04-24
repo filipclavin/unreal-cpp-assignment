@@ -52,8 +52,9 @@ void ACoolDrone::Tick(float DeltaTime)
 void ACoolDrone::HandleIdle(float DeltaTime)
 {
 	FVector ControlPointLocation = CurrentControlPoint->GetActorLocation();
+	FVector IgnoreZPos = FVector(ControlPointLocation.X, ControlPointLocation.Y, GetActorLocation().Z);
 
-	RotateTowards(ControlPointLocation, DeltaTime, true);
+	RotateTowards(IgnoreZPos, DeltaTime);
 	MoveTowards(ControlPointLocation, DeltaTime);
 
 	if (FVector::Dist(GetActorLocation(), CurrentControlPoint->GetActorLocation()) < TargetPositionTolerance)
@@ -111,10 +112,9 @@ void ACoolDrone::HandleAggressive(float DeltaTime)
 	TryFire();
 }
 
-void ACoolDrone::RotateTowards(const FVector& Position, float DeltaTime, bool DisablePitch)
+void ACoolDrone::RotateTowards(const FVector& Position, float DeltaTime)
 {
 	FVector Direction = Position - GetActorLocation();
-	if (DisablePitch) Direction.Z = 0.f;
 	Direction.Normalize();
 	FRotator TargetRotation = FRotationMatrix::MakeFromX(Direction).Rotator();
 	FRotator CurrentRotation = GetActorRotation();
@@ -122,10 +122,9 @@ void ACoolDrone::RotateTowards(const FVector& Position, float DeltaTime, bool Di
 	SetActorRotation(NewRotation);
 }
 
-void ACoolDrone::MoveTowards(const FVector& Position, float DeltaTime, bool DisableY)
+void ACoolDrone::MoveTowards(const FVector& Position, float DeltaTime)
 {
 	FVector Direction = Position - GetActorLocation();
-	if (DisableY) Direction.Z = 0.f;
 	Direction.Normalize();
 
 	FHitResult SweepHit;
