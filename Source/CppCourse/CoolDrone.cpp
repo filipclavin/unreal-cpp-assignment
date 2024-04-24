@@ -159,11 +159,13 @@ void ACoolDrone::SelectRandomControlPoint()
 			FCollisionQueryParams CollisionQueryParams;
 			CollisionQueryParams.AddIgnoredActor(this);
 			CollisionQueryParams.AddIgnoredActor(CurrentControlPoint);
-			GetWorld()->LineTraceSingleByChannel(
+			GetWorld()->SweepSingleByChannel(
 				HitResult,
 				GetActorLocation(),
 				ControlPoint->GetActorLocation(),
-				ECollisionChannel::ECC_PhysicsBody,
+				FQuat::Identity,
+				ECollisionChannel::ECC_Visibility,
+				FCollisionShape::MakeBox(Root->GetScaledBoxExtent()),
 				CollisionQueryParams
 			);
 
