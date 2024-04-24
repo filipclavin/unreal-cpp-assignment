@@ -56,19 +56,19 @@ private:
 	TSubclassOf<ATurretProjectile> ProjectileClass;
 
 	UPROPERTY(EditAnywhere)
-	float MovementSpeed = 100.f;
+	float MovementSpeed;
 
 	UPROPERTY(EditAnywhere)
-	float TurnRate = 5.f;
+	float TurnRate;
 
 	UPROPERTY(EditAnywhere)
-	float TargetPositionTolerance = 5.f;
+	float TargetPositionTolerance;
 
 	UPROPERTY(EditAnywhere, meta = (ClampMin = 0, ClampMax = 1))
-	float AimThreshold = 0.98f;
+	float AimThreshold;
 
 	UPROPERTY(EditAnywhere)
-	float FireRate = 2.f;
+	float FireRate;
 
 	UPROPERTY(VisibleAnywhere)
 	AActor* Target = nullptr;
@@ -76,12 +76,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	EDroneState CurrentState = EDroneState::Idle;
 
-	TMap<EDroneState, void (ACoolDrone::*)(float DeltaTime)> StateHandlers =
-	{
-		{EDroneState::Idle, &ACoolDrone::HandleIdle},
-		{EDroneState::Chase, &ACoolDrone::HandleChase},
-		{EDroneState::Aggressive, &ACoolDrone::HandleAggressive}
-	};
+	TMap<EDroneState, void (ACoolDrone::*)(float DeltaTime)> StateHandlers;
 
 	AActor* CurrentControlPoint = nullptr;
 

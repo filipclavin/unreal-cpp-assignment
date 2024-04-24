@@ -7,6 +7,8 @@ ATurretProjectile::ATurretProjectile()
 	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
 	RootComponent = Sphere;
 
+	UE_LOG(LogTemp, Warning, TEXT("TurretProjectile created!"));
+
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -22,6 +24,8 @@ void ATurretProjectile::Tick(float DeltaTime)
 		AActor* HitActor = SweepHit.GetActor();
 		if (HitActor)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Hit actor: %s"), *HitActor->GetName());
+
 			UCoolHealthComponent* HealthComponent = HitActor->FindComponentByClass<UCoolHealthComponent>();
 			if (HealthComponent)
 			{

@@ -22,21 +22,24 @@ ACoolDrone::ACoolDrone()
 	VisionSphere = CreateDefaultSubobject<USphereComponent>("VisionSphere");
 	VisionSphere->SetupAttachment(Root);
 	VisionSphere->SetSphereRadius(1000.f);
+	VisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ACoolDrone::HandleVisionBeginOverlap);
+	VisionSphere->OnComponentEndOverlap.AddDynamic(this, &ACoolDrone::HandleVisionEndOverlap);
 
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>("ProjectileSpawnPoint");
 	ProjectileSpawnPoint->SetupAttachment(Root);
 
 	HealthComponent = CreateDefaultSubobject<UCoolHealthComponent>("Health");
 	HealthComponent->OnDeath.AddDynamic(this, &ACoolDrone::HandleDeath);
+
+	StateHandlers.Add(EDroneState::Idle, &ACoolDrone::HandleIdle);
+	StateHandlers.Add(EDroneState::Chase, &ACoolDrone::HandleChase);
+	StateHandlers.Add(EDroneState::Aggressive, &ACoolDrone::HandleAggressive);
 }
 
 // Called when the game starts or when spawned
 void ACoolDrone::BeginPlay()
 {
 	Super::BeginPlay();
-
-	VisionSphere->OnComponentBeginOverlap.AddDynamic(this, &ACoolDrone::HandleVisionBeginOverlap);
-	VisionSphere->OnComponentEndOverlap.AddDynamic(this, &ACoolDrone::HandleVisionEndOverlap);
 
 	SelectRandomControlPoint();
 }
@@ -65,7 +68,11 @@ void ACoolDrone::HandleIdle(float DeltaTime)
 	{
 		if (TargetIsVisible())
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Target is visible!"));
 			CurrentState = EDroneState::Aggressive;
+		} else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Target is not visible!"));
 		}
 	}
 }
